@@ -1,10 +1,13 @@
 package com.todo
 import android.content.Context
+import android.content.DialogInterface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.view.Gravity
 import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import java.io.*
 
 class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnItemClickListener {
@@ -12,7 +15,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
     private lateinit var input: EditText;
     private lateinit var btnAdd: Button;
 
-    private lateinit var toDoList: ArrayList<String>;
+    private lateinit var list: ArrayList<String>;
     private lateinit var toDoListAdapter: ArrayAdapter<String>;
     private val FILENAME: String = "Listinfo.dat";
 
@@ -24,9 +27,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         input = findViewById(R.id.inputAdd);
         btnAdd = findViewById(R.id.btnAdd);
 
-        toDoList = readData(this);
+        list = readData(this);
 
-        toDoListAdapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, toDoList);
+        toDoListAdapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);
         toDoObj.adapter = toDoListAdapter;
 
         btnAdd.setOnClickListener(this);
@@ -77,18 +80,27 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, AdapterView.OnIt
         var toDoInput: String = input.text.toString();
         toDoListAdapter.add(toDoInput);
         input.setText("");
-        writeData(toDoList,this);
+        writeData(list,this);
         val toast = Toast.makeText(this,"Oggetto aggiunto", Toast.LENGTH_SHORT)
         toast.show()
     }
 
     override fun onItemClick(p0: AdapterView<*>?, v: View?, position: Int, p3: Long) {
-        toDoList.removeAt(position);
-        writeData(toDoList, this);
-        toDoListAdapter.notifyDataSetChanged();
 
-        var toast = Toast.makeText(this, "Oggetto eliminato",Toast.LENGTH_SHORT)
-        toast.show()
-
+        var alert = AlertDialog.Builder(this)
+        alert.setTitle("ELIMINARE")
+        alert.setMessage("Sei sicuro/a di voler eliminare questo elemento?")
+        alert.setPositiveButton("Conferma") { _: DialogInterface, _: Int ->
+            list.removeAt(position);
+            writeData(list, this);
+            toDoListAdapter.notifyDataSetChanged();
+            val toast = Toast.makeText(this, "Elemento eliminato",Toast.LENGTH_SHORT)
+            toast.show()
+        }
+        alert.setNegativeButton("Annulla") { _: DialogInterface, _: Int ->
+            val toast = Toast.makeText(this, "Annullato",Toast.LENGTH_SHORT)
+            toast.show()
+        }
+        alert.show()
     }
 }
